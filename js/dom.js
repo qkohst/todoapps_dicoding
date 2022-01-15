@@ -2,6 +2,8 @@
 // constant untuk menampung id elemen Todo yang belum selesai
 
 const UNCOMPLETED_LIST_TODO_ID = "todos";
+const COMPLETED_LIST_TODO_ID = "completed-todos";
+const TODO_ITEMID = "itemId"
 
 
 // menambahhkan item ke todolist
@@ -15,7 +17,15 @@ function addTodo() {
   console.log("timestamp" + timestamp);
 
   const todo = makeTodo(textTodo, timestamp);
+
+  // berfungsi untuk menyimpan objek task yang kita buat ke dalam variabel todos yang telah dibuat sebelumnya.
+  const todoObject = composeTodoObject(textTodo, timestamp, false);
+
+  todo[TODO_ITEMID] = todoObject.id;
+  todos.push(todoObject);
+
   uncompletedTODOList.append(todo);
+  updateDataToStorage();
 }
 
 // membuat sebuah tombol untuk menandai bahwa todo sudah selesai dilakukan
@@ -29,10 +39,6 @@ function createButton(buttonTypeClass, eventListener) {
   return button;
 }
 
-
-// variabel konstan yang bersifat global untuk menampung id dari elemen container todo yang sudah selesai.
-
-const COMPLETED_LIST_TODO_ID = "completed-todos";
 
 function addTaskToCompleted(taskElement) {
   taskElement.remove();
@@ -84,15 +90,28 @@ function addTaskToCompleted(taskElement) {
 
   const newTodo = makeTodo(taskTitle, taskTimestamp, true);
   const listCompleted = document.getElementById(COMPLETED_LIST_TODO_ID);
+
+  const todo = findTodo(taskElement[TODO_ITEMID]);
+  todo.isCompleted = true;
+  newTodo[TODO_ITEMID] = todo.id;
+
   listCompleted.append(newTodo);
   taskElement.remove();
+
+  updateDataToStorage();
+
 }
 
 
 // untuk menghapus elemen todo yang sudah selesai.
 
-function removeTaskFromCompleted(taskElement) {
+function removeTaskFromCompleted(taskElement /* HTMLELement */) {
+
+  const todoPosition = findTodoIndex(taskElement[TODO_ITEMID]);
+  todos.splice(todoPosition, 1);
+
   taskElement.remove();
+  updateDataToStorage();
 }
 
 
@@ -114,8 +133,14 @@ function undoTaskFromCompleted(taskElement) {
 
   const newTodo = makeTodo(taskTitle, taskTimestamp, false);
 
+  const todo = findTodo(taskElement[TODO_ITEMID]);
+  todo.isCompleted = false;
+  newTodo[TODO_ITEMID] = todo.id;
+
   listUncompleted.append(newTodo);
   taskElement.remove();
+
+  updateDataToStorage();
 }
 
 
